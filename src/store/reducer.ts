@@ -1,23 +1,6 @@
 import {Todo, TodosActionTypes, todosState} from "../types/state";
 import {ActionTypes} from "../const";
-
-const addSubtask = (todos: Todo[], parentId: string | undefined, newSubtask: Todo): Todo[] => {
-  return todos.map((todo) => {
-    if (todo.idTodo === parentId){
-      return {
-        ...todo,
-        subTasks: todo.subTasks ? [...todo.subTasks, newSubtask] : [newSubtask]
-      }
-    } else if (todo.subTasks) {
-      return {
-        ...todo,
-        subTasks: addSubtask(todo.subTasks, parentId, newSubtask)
-      }
-    }
-
-    return todo;
-  })
-};
+import {addSubtask, deleteTodo, toggleEditTodo, toggleTodo, updateTodo} from "../utils";
 
 const initialState: todosState = {
   todos: [{
@@ -73,38 +56,29 @@ export const todoReducer = (state = initialState, action: TodosActionTypes): tod
 
     case ActionTypes.DELETE_TODO:
       const todoIndex = action.payload.idTodo;
+      const updatedTodosDelete = deleteTodo(state.todos, todoIndex)
       return {
         ...state,
-        todos: state.todos.filter((item) => item.idTodo !== todoIndex)
+        todos: updatedTodosDelete
       }
 
     case ActionTypes.UPDATE_TODO:
-      debugger
+      const editingTodos = updateTodo(state.todos, action.payload.idTodo, action.payload.textTodo, action.payload.description);
       return {
-        todos: state.todos.map((item) => (item.idTodo === action.payload.idTodo
-        ? {...item, textTodo: action.payload.textTodo, description: action.payload.description}
-        : item
-        ))
+        todos: editingTodos
       }
 
     case ActionTypes.TOGGLE_TODO:
+      const updatedTodosCompleted = toggleTodo(state.todos, action.payload.idTodo)
       return {
-        todos: state.todos.map((item) => (item.idTodo === action.payload.idTodo
-        ? {...item, isComplete: !item.isComplete}
-        : item
-        ))
+        todos: updatedTodosCompleted
       }
 
     case ActionTypes.TOGGLE_EDIT_TODO:
+      const updatedTodosEdited = toggleEditTodo(state.todos, action.payload.idTodo)
       return {
-        todos: state.todos.map((item) => (item.idTodo === action.payload.idTodo
-        ? {...item, isEditing: !item.isEditing}
-        : item
-        ))
+        todos: updatedTodosEdited
       }
-
-    case ActionTypes.LOAD_REQUEST:
-      return {...state}
 
     default:
       return state;

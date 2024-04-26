@@ -66,7 +66,7 @@ function TodosList({list, onDeleteTodo}: TodosListProps) {
         <EditForm todo={todo} onSaveEdit={acceptEdit} isEditOpen={todo.isEditing} />
       }
 
-      <Checkbox className="todos__checkbox" onClick={() => dispatch(toggleTodo(todo.idTodo))}>
+      <Checkbox className="todos__checkbox" checked={todo.isComplete} onClick={() => dispatch(toggleTodo(todo.idTodo))}>
         {todo.textTodo}
       </Checkbox>
 

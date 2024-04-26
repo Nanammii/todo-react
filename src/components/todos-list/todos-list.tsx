@@ -1,61 +1,100 @@
-import React, {useState} from 'react';
-import {Checkbox, List, Modal} from "antd";
+import React, {memo, useState} from 'react';
+import {Checkbox, Form, List, Modal, Tree, TreeDataNode} from "antd";
+import {Todo} from "../../types/state";
+import EditForm from "../edit-form/edit-form";
+import {addSubtask, toggleEditTodo, toggleTodo, updateTodo} from "../../store/action";
+import {useAppDispatch} from "../../hooks";
 import TodosForm from "../todos-form/todos-form";
 
 type TodosListProps = {
-  list: string[],
-  onDeleteTodo: (index: number) => void
+  list: Todo[] | TreeDataNode[] | undefined,
+  onDeleteTodo: (index: string) => void
 };
 
 function TodosList({list, onDeleteTodo}: TodosListProps) {
+  const dispatch = useAppDispatch();
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [form] = Form.useForm();
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
+  const handleToggleEdit = (id: string) => {
+    dispatch(toggleEditTodo(id));
   }
 
-  const handleOkModal = () => {
-    setIsModalOpen(false);
+  const acceptEdit = (idTodo: string, text: string, description: string) => {
+    // setIsModalOpen(false);
+    if (text !== '') {
+      dispatch(updateTodo(idTodo, text, description));
+      dispatch(toggleEditTodo(idTodo));
+    }
+  };
+
+  const handleFormVisible = (id: string) => {
+    setIsFormVisible(true);
+    setSelectedTaskId(id);
   }
 
-  const handleCancelModal = () => {
-    setIsModalOpen(false);
+  const handleCloseForm = () => {
+    setIsFormVisible(false);
+    setSelectedTaskId(null);
   }
 
-  // const handleEditSubmit = (idTodo: number, textTodo: string) => {
-  //   const updatedTodo = list.map((item: string, index: number) => index === idTodo
-  //     ? {...item, textTodo}
-  //     : item
-  //   );
-  //   console.log(updatedTodo)
-  // }
+  const handleFormAddSubTaskSubmit = (text: string) => {
+    console.log(text)
+    if (text.length > 0) {
+      dispatch(addSubtask(text, selectedTaskId as string));
+    }
+    setIsFormVisible(false);
+    setSelectedTaskId(null);
+  }
+
+  const renderTodo = (todo: Todo) => (
+    <List.Item
+      key={todo.idTodo}
+      actions={[
+        <a key="add-subtask" onClick={() => handleFormVisible(todo.idTodo)}>add subtask</a>,
+        <a key="list-edit" onClick={() => handleToggleEdit(todo.idTodo)}>edit</a>,
+        <a key="list-delete" onClick={() => onDeleteTodo(todo.idTodo)}>delete</a>
+      ]}
+      style={{flexWrap: "wrap"}}
+    >
+      <List.Item.Meta
+        title={<a href="#" >{todo.textTodo}</a>}
+        description={todo.description}
+      />
+      {todo.isEditing &&
+        <EditForm todo={todo} onSaveEdit={acceptEdit} isEditOpen={todo.isEditing} />
+      }
+
+      <Checkbox className="todos__checkbox" onClick={() => dispatch(toggleTodo(todo.idTodo))}>
+        {todo.textTodo}
+      </Checkbox>
+
+      {isFormVisible &&
+        <Modal  open={isFormVisible} onOk={form.submit} onCancel={handleCloseForm}>
+          <TodosForm formEdit={form} onFormSubmit={handleFormAddSubTaskSubmit} />
+        </Modal>
+      }
+
+      {todo.subTasks && todo.subTasks?.length > 0 &&
+        <List
+          className="todos__list--subtask"
+          itemLayout="horizontal"
+          dataSource={todo.subTasks}
+          renderItem={renderTodo}
+        />
+      }
+    </List.Item>
+  )
 
   return (
     <List
       className="todos__list"
       itemLayout="horizontal"
-      dataSource={list}
-      renderItem={(item: string, index: number) => (
-        <List.Item
-          key={item}
-          actions={[
-            <a key="list-edit" >edit</a>,
-            <a key="list-delete" onClick={() => onDeleteTodo(index)}>delete</a>
-          ]}
-        >
-          <List.Item.Meta
-            title={<a href="#" onClick={handleOpenModal}>{item}</a>}
-            description={"description"}
-          />
-          <Checkbox className="todos__checkbox">{item}</Checkbox>
-          <Modal title={item} open={isModalOpen} onOk={handleOkModal} onCancel={handleCancelModal}>
-            {/*<TodosForm onFormSubmit={} />*/}
-          </Modal>
-        </List.Item>
-      )}
+      dataSource={list as Todo[]}
+      renderItem={renderTodo}
     />
   );
 }
 
-export default TodosList;
+export default memo(TodosList);

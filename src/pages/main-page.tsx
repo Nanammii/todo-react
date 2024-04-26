@@ -1,7 +1,10 @@
-import React, {useState} from 'react';
+import React, {useEffect} from 'react';
 import TodosForm from "../components/todos-form/todos-form";
 import TodosList from "../components/todos-list/todos-list";
-import {Flex, Form, Input, Layout} from 'antd';
+import {Flex, Layout} from 'antd';
+import {State, Todo} from "../types/state";
+import {addTodo, deleteTodo, loadRequest} from "../store/action";
+import {useAppDispatch, useAppSelector} from "../hooks";
 
 const {Header, Content} = Layout;
 const headerStyle: React.CSSProperties = {
@@ -28,21 +31,20 @@ const layoutStyle = {
 };
 
 function MainPage(): JSX.Element {
-  const [todos, setTodos] = useState<string[]>(['task 1']);
+  const dispatch = useAppDispatch();
+  const todos = useAppSelector((state: State): Todo[] => state.todos?.todos);
+
   console.log(todos)
 
   const handleSubmitForm = (todoText: string) => {
     if (todoText.length > 0) {
-      setTodos([...todos, todoText])
+      dispatch(addTodo(todoText));
     }
   }
 
-  const handleDeleteTodo = (index: number) => {
-    const currentTodos = todos.filter((_, idTodo) => idTodo !== index);
-    setTodos(currentTodos);
+  const handleDeleteTodo = (index: string, id = null) => {
+    dispatch(deleteTodo(index))
   }
-
-
 
   return (
     <Layout style={layoutStyle}>

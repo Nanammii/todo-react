@@ -3,23 +3,27 @@ import { Form, Input } from "antd";
 
 type TodosFormProps = {
   onFormSubmit: (text: string) => void,
+  formEdit?: any
 }
 
 type FieldType = {
-  todoText?: string;
+  todoText?: string,
 };
 
-function TodosForm({onFormSubmit}: TodosFormProps): JSX.Element {
+function TodosForm({onFormSubmit, formEdit}: TodosFormProps): JSX.Element {
   const [valueTodo, setValueTodo] = useState<string>("");
+  const [form] = Form.useForm();
 
   const handleSubmit = () => {
     onFormSubmit(valueTodo);
-    console.log(valueTodo);
-    setValueTodo("");
+    if (formEdit) {
+      formEdit.resetFields();
+    }
+    form.resetFields();
   }
 
   return (
-    <Form onFinish={handleSubmit} autoComplete="off">
+    <Form form={formEdit ? formEdit : form} onFinish={handleSubmit} autoComplete="off">
       <Form.Item<FieldType>
         name="todoText"
         rules={[{ required: true, message: 'What needs to be done?' }]}

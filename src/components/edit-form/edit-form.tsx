@@ -40,13 +40,15 @@ function EditForm({todo, onSaveEdit, isEditOpen}: EditFormProps): JSX.Element {
            onOk={form.submit}
            onCancel={handleCancelForm}
     >
-      <Form form={form} autoComplete="off" onFinish={handleSaveEditForm}>
+      <Form form={form} autoComplete="off" onFinish={handleSaveEditForm}
+            initialValues={{todoText: todo.textTodo, description: todo.description}}
+      >
         <Form.Item<FieldType>
           name="todoText"
           rules={[{ required: true }]}
         >
           <Input
-            defaultValue={todo.textTodo} value={detailsForm.text}
+            value={detailsForm.text}
             onChange={(e) =>
               setDetailsForm({...detailsForm, text: e.target.value})}
           />
@@ -56,7 +58,6 @@ function EditForm({todo, onSaveEdit, isEditOpen}: EditFormProps): JSX.Element {
           rules={[{ required: false }]}
         >
           <Input
-            defaultValue={todo.description}
             value={detailsForm.description}
             onChange={(e) =>
               setDetailsForm({...detailsForm, description: e.target.value})}

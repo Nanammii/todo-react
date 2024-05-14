@@ -8,6 +8,14 @@
 - Redux
 - Ant Design UI
 
+### ТЗ 
+Необходимо разработать лист задач по следующим требованиям:
+1. Создавать/редактировать/удалять задачи
+2. У задачи есть заголовок и описание
+3. Просмотр задачи
+4. Задачи могут иметь бесконечную вложенность
+5. При первом открытии приложения должны быть создана хотя бы 1 задача
+
 ## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
